@@ -1,9 +1,10 @@
-from normalized_array import NormalizedArray
+import re
 
-class Extensions(NormalizedArray):
+class Extensions:
 
-	def normalize_element(self,extension):
-		if extension.match('/^\./'):
+	@staticmethod
+	def normalize_element(extension):
+		if re.search('/^\./',extension):
 			return extension
 		else:
 			return "." + extension

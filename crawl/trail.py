@@ -11,15 +11,15 @@ class Trail:
 		self._results = []
 
 	def append_extension(self,extension):
-		if not util.find(lambda extension:extension, self._extensions):
+		if extension not in self._extensions:
 			self._extensions.append(Extensions.normalize_element(extension))
 
-	def append_extensions(self,*args):
-		for ext in args:
+	def append_extensions(self,extensions):
+		for ext in extensions:
 			self.append_extension(Extensions.normalize_element(ext))
 
 	def append_path(self,path):
-		if not util.find(path, self._paths):
+		if path not in self._paths:
 			self._paths.append(str(path))
 
 	def append_paths(self,*args):
