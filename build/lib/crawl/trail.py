@@ -14,8 +14,8 @@ class Trail:
 		if extension not in self._extensions:
 			self._extensions.append(Extensions.normalize_element(extension))
 
-	def append_extensions(self,*args):
-		for ext in args:
+	def append_extensions(self,extensions):
+		for ext in extensions:
 			self.append_extension(Extensions.normalize_element(ext))
 
 	def append_path(self,path):
@@ -27,6 +27,8 @@ class Trail:
 			self.append_path(path)
 
 	def find(self,target):
+		print target
+		self._results = []
 		for path in self._paths:
 			for ext in self._extensions:
 				search_path = os.path.join(self._root,path,target + ext)

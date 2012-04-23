@@ -27,11 +27,11 @@ class Trail:
 			self.append_path(path)
 
 	def find(self,target):
+		self._results = []
 		for path in self._paths:
 			for ext in self._extensions:
 				search_path = os.path.join(self._root,path,target + ext)
 				search_path = os.path.abspath(search_path)
-				print search_path
 				if(os.path.exists(search_path)):
 					self._results.append(str(search_path))
 		
