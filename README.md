@@ -10,6 +10,17 @@ While Crawl does work at the basic level, it is not yet a complete port
 of Hike, as it doesn't implement Hike's index caching for speedier
 responses, although I do intend to add that.
 
+Install
+-------
+
+###Pip###
+```bash
+$ pip install crawl
+```
+or
+###Download###
+[Downlad Tarball](https://github.com/OiNutter/crawl/tarball/master)
+
 Usage
 ----
 
