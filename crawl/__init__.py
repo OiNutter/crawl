@@ -1,3 +1,2 @@
 from extensions import Extensions
-from trail import Trail
-import util
+from crawl import Crawl
