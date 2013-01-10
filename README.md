@@ -13,20 +13,16 @@ responses, although I do intend to add that.
 Install
 -------
 
-###Pip###
 ```bash
 $ pip install crawl
 ```
-or
-###Download###
-[Downlad Tarball](https://github.com/OiNutter/crawl/tarball/master)
 
 Usage
 ----
 
 ```python
 import crawl
-trail = crawl.Trail()
+trail = crawl.Crawl()
 trail.add_paths('lib','foo','bar')
 trail.add_extensions('js','py')
 trail.find('blah')
