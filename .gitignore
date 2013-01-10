@@ -1,2 +1,5 @@
 *.sublime-*
 *.pyc
+build/*
+dist/*
+MANIFEST
