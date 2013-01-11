@@ -23,8 +23,8 @@ Usage
 ```python
 import crawl
 trail = crawl.Crawl()
-trail.add_paths('lib','foo','bar')
-trail.add_extensions('js','py')
+trail.append_paths('lib','foo','bar')
+trail.append_extensions('js','py')
 trail.find('blah')
 ```
 
