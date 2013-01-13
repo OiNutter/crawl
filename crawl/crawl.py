@@ -17,18 +17,26 @@ class Crawl:
 			self.extensions.append(normalize_element(extension))
 
 	def append_extensions(self,*extensions):
+
+		if isinstance(extensions[0],list):
+			extensions = extensions[0]
+
 		for ext in extensions:
 			self.append_extension(normalize_element(ext))
 
-	def alias_extensions(self,alias,extension):
+	def alias_extension(self,alias,extension):
 		self.aliases[alias] = normalize_element(extension)
 
 	def append_path(self,path):
 		if path not in self.paths:
 			self.paths.append(str(path))
 
-	def append_paths(self,*args):
-		for path in args:
+	def append_paths(self,*paths):
+
+		if isinstance(paths[0],list):
+			paths = paths[0]
+			
+		for path in paths:
 			self.append_path(path)
 
 	def is_relative_path(self,path):
@@ -77,7 +85,6 @@ class Crawl:
 
 	def do_paths_contain(self,dirname):
 		matches = [path for path in self.paths if str(dirname)[0:len(path)] == path]
-
 		return True if matches else False
 
 	def match(self,dirname,basename,callback=None):
@@ -113,14 +120,13 @@ class Crawl:
 			basename_re += "(%s)" % '|'.join([re.escape(ext) for ext in aliases])
 
 		extension_pattern = '|'.join([re.escape(ext) for ext in self.extensions])
-		
 		return re.compile(r"""^%s(?:%s)*$""" % (basename_re,extension_pattern))
 
-	def 	find_aliases_for_ext(self,ext):
+	def find_aliases_for_ext(self,ext):
 
 		exts = []
 
-		for alias,original in self.aliases:
+		for alias,original in self.aliases.iteritems():
 			if original == ext:
 				exts.append(alias)
 
