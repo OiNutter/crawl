@@ -1,133 +1,74 @@
-from extensions import normalize_element
 import os
-import re
+
+from index import Index
+from paths import Paths
+from extensions import Extensions
 
 class Crawl:
 
 	def __init__(self,root="."):
-		self.root = str(os.path.abspath(root))
-		self.extensions = []
-		self.aliases={}
-		self.paths = []
-		self.results = []
-		self.patterns = {}
+		self.root = os.path.abspath(root)
+		self.paths = Paths(root=self.root)
+		self.extensions = Extensions()
+		self.aliases = {}
 
-	def append_extension(self,extension):
-		if extension not in self.extensions:
-			self.extensions.append(normalize_element(extension))
+	def prepend_paths(self,*paths):
+		new = Paths(paths)
+		new.extend(self.paths)
+		self.paths = new
 
-	def append_extensions(self,*extensions):
-
-		if isinstance(extensions[0],list):
-			extensions = extensions[0]
-
-		for ext in extensions:
-			self.append_extension(normalize_element(ext))
-
-	def alias_extension(self,alias,extension):
-		self.aliases[alias] = normalize_element(extension)
-
-	def append_path(self,path):
-		if path not in self.paths:
-			self.paths.append(str(path))
+	def prepend_path(self,*paths):
+		self.prepend_paths(*paths)
 
 	def append_paths(self,*paths):
-
-		if isinstance(paths[0],list):
-			paths = paths[0]
-			
 		for path in paths:
-			self.append_path(path)
+			self.paths.append(path)
 
-	def is_relative_path(self,path):
-		return True if re.match(r"""^\.\.?\/""",path) else False
+	def append_path(self,*paths):
+		self.append_paths(*paths)
 
-	def entries(self,target):
-		
-		entries = []
-		for dirpath,dirname,filenames in os.walk(target):
-			entries = filenames
-			break
+	def remove_path(self,path):
+		if path in self.paths:
+			self.paths.remove(path)
 
-		entries[:] = [filename for filename in entries if filename != "." and filename != ".."]
+	def prepend_extensions(self,*extensions):
+		new = Extensions(extensions)
+		new.extend(self.extensions)
+		self.extensions = new
 
-		return entries
+	def prepend_extension(self,*extensions):
+		self.prepend_extensions(*extensions)
 
-	def find(self,*logical_paths,**kwargs):
-		
-		if kwargs.has_key('callback') and kwargs['callback']:
+	def append_extensions(self,*extensions):
+		for extension in extensions:
+			self.extensions.append(extension)
 
-			for path in logical_paths:
-				if not self.is_relative_path(path):
-					return self.find_in_paths(path,kwargs['callback'])
-				else:
-					return self.find_in_base_path(path,self.root,kwargs['callback'])
+	def append_extension(self,*extensions):
+		self.append_extensions(*extensions)
 
-		else:
-			return self.find(*logical_paths,callback = lambda path:path)
+	def remove_extension(self,extension):
+		if extension in self.extensions:
+			self.extensions.remove(extension)
 
-	def find_in_paths(self,path,callback=None):
+	def alias_extension(self,new_extension,old_extension):
+		new_extension = self.extensions.normalize_element(new_extension)
 
-		dirname,basename = os.path.split(path)
+		if not self.aliases.has_key(new_extension):
+			self.aliases[new_extension] = Extensions()
 
-		for path in self.paths:
-			result = self.match(os.path.join(path,dirname),basename,callback)
-			if result:
-				return result
+		self.aliases[new_extension].append(old_extension)
 
-		return None
+	def unalias_extension(self,extension):
+		del self.aliases[self.extensions.normalize_element(extension)]
 
-	def find_in_base_path(self,path,base_path,callback=None):
+	def find(self,*args,**kwargs):
+		return self.index().find(*args,**kwargs)
 
-		candidate = os.path.join(base_path,path)
-		dirname,basename = os.path.split(candidate)
-		return self.match(dirname,basename,callback) if self.do_paths_contain(dirname) else None
+	def index(self):
+		return Index(self.root,self.paths,self.extensions,self.aliases)
 
-	def do_paths_contain(self,dirname):
-		matches = [path for path in self.paths if str(dirname)[0:len(path)] == path]
-		return True if matches else False
+	def entries(self,*args):
+		return self.index().entries(*args)
 
-	def match(self,dirname,basename,callback=None):
-		
-		matches = self.entries(dirname)
-
-		pattern = self.get_pattern_for(basename)
-
-		matches[:] = [match for match in matches if pattern.match(match)]
-
-		for path in matches:
-			pathname = os.path.abspath(os.path.join(dirname,path))
-
-			if os.path.isfile(pathname):
-				return callback(pathname) if callback else pathname
-
-	def get_pattern_for(self,basename):
-		if self.patterns.has_key(basename):
-			return self.patterns[basename]
-		else:
-			pattern = self.build_pattern_for(basename)
-			self.patterns[basename] = pattern
-			return pattern
-
-	def build_pattern_for(self,basename):
-
-		filename, ext = os.path.splitext(basename.lower())
-		aliases = self.find_aliases_for_ext(normalize_element(ext))
-
-		basename_re = re.escape(basename)
-
-		if aliases:
-			basename_re += "(%s)" % '|'.join([re.escape(ext) for ext in aliases])
-
-		extension_pattern = '|'.join([re.escape(ext) for ext in self.extensions])
-		return re.compile(r"""^%s(?:%s)*$""" % (basename_re,extension_pattern))
-
-	def find_aliases_for_ext(self,ext):
-
-		exts = []
-
-		for alias,original in self.aliases.iteritems():
-			if original == ext:
-				exts.append(alias)
-
-		return exts
+	def stat(self,*args):
+		return self.index().stat(*args)
