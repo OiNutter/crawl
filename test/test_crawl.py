@@ -52,3 +52,9 @@ class TestCrawl(unittest.TestCase):
 				self.fixture_path("app/views/projects/index.html.erb"),
 				self.crawl.find("projects/index.html")
 			)
+
+	def testFindWithExtension(self):
+		self.assertEqual(
+				self.fixture_path("app/views/projects/index.html.erb"),
+				self.crawl.find("projects/index.html.erb")
+			)
