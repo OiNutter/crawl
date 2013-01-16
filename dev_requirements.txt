@@ -1,1 +1,2 @@
-unittest==2.7.0
+unittest
+nose
