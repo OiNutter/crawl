@@ -42,7 +42,7 @@ class TestCrawl(unittest.TestCase):
 		self.assertEqual([".builder",".coffee",".str",".erb"],self.crawl.extensions)
 
 	def testIndex(self):
-		self.assertIsInstance(crawl.index.Index,self.crawl.get_index())
+		self.assertIsInstance(self.crawl.index(),crawl.index.Index)
 
 	def testFindNonexistantFile(self):
 		self.assertIsNone(self.crawl.find("people/show.html"))
