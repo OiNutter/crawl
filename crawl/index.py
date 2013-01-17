@@ -74,7 +74,7 @@ class Index:
 
 	def find_in_base_path(self,path,base_path,callback=None):
 
-		candidate = os.path.abspath(os.path.join(base_path,path))
+		candidate = os.path.join(base_path,path)
 		dirname,basename = os.path.split(candidate)
 		return self.match(dirname,basename,callback) if self.do_paths_contain(dirname) else None
 

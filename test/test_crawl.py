@@ -6,7 +6,7 @@ import os
 import crawl
 from crawl_test import FIXTURE_ROOT
 
-class TestCrawl(unittest.TestCase):
+class BaseTests(object):
 
 	def new_crawl(self,callback=None):
 		search_path = crawl.Crawl(FIXTURE_ROOT)
@@ -193,6 +193,7 @@ class TestCrawl(unittest.TestCase):
 			)
 
 	def testBasePathOptionMustBeExpanded(self):
+		self.setUp()
 		if hasattr(self,'assertIsNone'):
 			self.assertIsNone(self.crawl.find('./index.html',base_path='app/views/projects'))
 		else:
@@ -270,3 +271,86 @@ class TestCrawl(unittest.TestCase):
 			self.assertIsNone(self.crawl.stat(self.fixture_path("app/views/missing.html")))
 		else:
 			self.assertEquals(None,self.crawl.stat(self.fixture_path("app/views/missing.html")))
+
+class CrawlTest(BaseTests,unittest.TestCase):
+
+	def testRootDefaultsToCWD(self):
+		cur_dir = os.curdir
+		os.chdir(FIXTURE_ROOT)
+		search = crawl.Crawl()
+		self.assertEqual(FIXTURE_ROOT,search.root)
+		os.chdir(cur_dir)
+
+	def testFindReflectsChangesInTheFileSystem(self):
+		try:
+			if hasattr(self,'assertIsNone'):
+				self.assertIsNone(self.crawl.find("dashboard.html"))
+			else:
+				self.assertEquals(None,self.crawl.find("dashboard.html"))
+			f = open(self.fixture_path('dashboard.html'),'w')
+			f.write('dashboard')
+			f.close()
+			self.assertEqual(
+					self.fixture_path('dashboard.html'),
+					self.crawl.find('dashboard.html')
+				)
+		finally:
+			os.unlink(self.fixture_path('dashboard.html'))
+			assert not os.path.exists(self.fixture_path('dashboard.html'))
+
+class IndexTest(BaseTests,unittest.TestCase):
+
+	def new_crawl(self,callback=None):
+		search = super(IndexTest,self).new_crawl(callback=callback)
+		return search.index()
+
+	def testChangingTrailPathDoesntAffectIndex(self):
+		search = crawl.Crawl(FIXTURE_ROOT)
+		search.paths.append('.')
+
+		index = search.index()
+
+		self.assertEqual([self.fixture_path('.')],search.paths)
+		self.assertEqual([self.fixture_path('.')],index.paths)
+
+		search.paths.append("app/views")
+
+		self.assertEqual(
+				[self.fixture_path("."),self.fixture_path("app/views")],
+				search.paths
+			)
+
+		self.assertEqual([self.fixture_path('.')],index.paths)
+
+	def testChangingTrailExtensionsDoesntAffectIndex(self):
+		search = crawl.Crawl(FIXTURE_ROOT)
+		search.extensions.append('builder')
+
+		index = search.index()
+
+		self.assertEqual(['.builder'],search.extensions)
+		self.assertEqual(['.builder'],index.extensions)
+
+		search.extensions.append('str')
+
+		self.assertEqual(['.builder','.str'],search.extensions)
+		self.assertEqual(['.builder'],index.extensions)
+
+	def testFindDoesNotReflectChangesInTheFileSystem(self):
+		try:
+			if hasattr(self,'assertIsNone'):
+				self.assertIsNone(self.crawl.find("dashboard.html"))
+			else:
+				self.assertEquals(None,self.crawl.find("dashboard.html"))
+			f = open(self.fixture_path('dashboard.html'),'w')
+			f.write('dashboard')
+			f.close()
+			if hasattr(self,'assertIsNone'):
+				self.assertIsNone(self.crawl.find("dashboard.html"))
+			else:
+				self.assertEquals(None,self.crawl.find("dashboard.html"))
+		finally:
+			os.unlink(self.fixture_path('dashboard.html'))
+			assert not os.path.exists(self.fixture_path('dashboard.html'))
+
+
