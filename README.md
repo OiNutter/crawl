@@ -5,12 +5,8 @@ Crawl
 
 Crawl is a port of the Ruby gem
 [Hike](https://github.com/sstephenson/hike) to Python. Crawl will scan
-through a list of given folders for a requested file. You can also
-configure it to just match any of a given list of extensions.
-
-While Crawl does work at the basic level, it is not yet a complete port
-of Hike, as it doesn't implement Hike's index caching for speedier
-responses, although I do intend to add that.
+through a list of given folders for a requested file. You can also specify
+a list of possible extensions and aliases for those extensions.
 
 Install
 -------
@@ -27,6 +23,7 @@ import crawl
 trail = crawl.Crawl()
 trail.append_paths('lib','foo','bar')
 trail.append_extensions('js','py')
+trail.alias_extension('.coffee','.js')
 trail.find('blah')
 ```
 
@@ -51,6 +48,13 @@ Run the following from the command line to run all tests:
 ```bash
 $ nosetests
 ```
+
+Credits
+-------
+
+Huge amounts of credit to Sam Stephenson(@sstephenson) and Josh Peek(@josh) for all their work on the original 
+[Hike](https://github.com/sstephenson/hike) gem. I have basically just rewritten their code and tests in python, tweaking where necessary to 
+make things more 'pythonic' (I hope).
 
 License
 -------
