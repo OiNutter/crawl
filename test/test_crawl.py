@@ -42,7 +42,10 @@ class BaseTests(object):
 		self.assertEqual([".builder",".coffee",".str",".erb"],self.crawl.extensions)
 
 	def testIndex(self):
-		self.assertIsInstance(self.crawl.index(),crawl.index.Index)
+		if hasattr(self,'assertIsInstance'):
+			self.assertIsInstance(self.crawl.index(),crawl.index.Index)
+		else:
+			assert isinstance(self.crawl.index(),crawl.index.Index)
 
 	def testFindNonexistantFile(self):
 		if hasattr(self,'assertIsNone'):
@@ -242,7 +245,7 @@ class BaseTests(object):
 		if hasattr(self,'assertIsNone'):
 			self.assertIsNone(self.crawl.find("recordings"))
 		else:
-			self.assertEqual(None,self.craw.find("recordings"))
+			self.assertEqual(None,self.crawl.find("recordings"))
 
 	def testEntries(self):
 		expected = [
