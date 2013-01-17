@@ -53,10 +53,7 @@ class Crawl:
 	def alias_extension(self,new_extension,old_extension):
 		new_extension = self.extensions.normalize_element(new_extension)
 
-		if not self.aliases.has_key(new_extension):
-			self.aliases[new_extension] = Extensions()
-
-		self.aliases[new_extension].append(old_extension)
+		self.aliases[new_extension] = self.extensions.normalize_element(old_extension)
 
 	def unalias_extension(self,extension):
 		del self.aliases[self.extensions.normalize_element(extension)]

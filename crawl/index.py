@@ -26,37 +26,40 @@ class Index:
 			entries = []
 
 			if os.path.exists(path) and os.path.isdir(path):
-				for dirpath,dirname,filenames in os.walk(path):
-					entries = filenames
-					break
+					entries = os.listdir(path)
+					print entries
 
-				entries[:] = [filename for filename in entries if filename != "." and filename != ".."]
+			self.entries_cache[path] = [filename for filename in entries if not re.search(r"""^\.|~$|^\#.*\#$""",filename)]
 
-			self.entries_cache[path]= entries
-
-		return self.entries_cache[path]
+		return copy.deepcopy(self.entries_cache[path])
 
 	def stat(self,path):
 
 		if not self.stat_cache.has_key(path):
-			self.stat_cache[path] = os.stat(path)
+			self.stat_cache[path] = os.stat(path) if os.path.exists(path) else None
 
-		return self.stat_cache[path]
+		return copy.deepcopy(self.stat_cache[path])
 
 	def find(self,*logical_paths,**kwargs):
-		
+	
 		if kwargs.has_key('callback') and kwargs['callback']:
 
 			base_path = kwargs.get('base_path',self.root)
 
 			for path in logical_paths:
+				path = re.sub(r"""^/""",'',path)
+
 				if not self.is_relative_path(path):
-					return self.find_in_paths(path,kwargs['callback'])
+					result = self.find_in_paths(path,kwargs['callback'])
 				else:
-					return self.find_in_base_path(path,base_path,kwargs['callback'])
+					result = self.find_in_base_path(path,base_path,kwargs['callback'])
+
+				if result:
+					return result
 
 		else:
-			return self.find(*logical_paths,callback = lambda path:path)
+			kwargs['callback'] = lambda paths:paths[0] if paths else None
+			return self.find(*logical_paths,**kwargs)
 
 	def find_in_paths(self,path,callback=None):
 
@@ -71,7 +74,7 @@ class Index:
 
 	def find_in_base_path(self,path,base_path,callback=None):
 
-		candidate = os.path.join(base_path,path)
+		candidate = os.path.abspath(os.path.join(base_path,path))
 		dirname,basename = os.path.split(candidate)
 		return self.match(dirname,basename,callback) if self.do_paths_contain(dirname) else None
 
@@ -87,11 +90,15 @@ class Index:
 
 		matches[:] = [match for match in matches if pattern.match(match)]
 
-		for path in matches:
+		results = []
+		for path in self.sort_matches(matches,basename):
 			pathname = os.path.abspath(os.path.join(dirname,path))
 
 			if os.path.isfile(pathname):
-				return callback(pathname) if callback else pathname
+				results.append(pathname)
+
+		print 'RESULTS: ', results
+		return callback(results) if callback else results
 
 	def get_pattern_for(self,basename):
 		if self.patterns.has_key(basename):
@@ -109,10 +116,10 @@ class Index:
 		basename_re = re.escape(basename)
 
 		if aliases:
-			basename_re += "(%s)" % '|'.join([re.escape(ext) for ext in aliases])
+			aliases.insert(0,ext)
+			basename_re = "%s(%s)" % (re.escape(filename),'|'.join([re.escape(ext) for ext in aliases]))
 
 		extension_pattern = '|'.join([re.escape(ext) for ext in self.extensions])
-		
 		return re.compile(r"""^%s(?:%s)*$""" % (basename_re,extension_pattern))
 
 	def find_aliases_for_ext(self,ext):
@@ -120,7 +127,27 @@ class Index:
 		exts = []
 
 		for alias,original in self.aliases.iteritems():
+
 			if original == ext:
 				exts.append(alias)
 
 		return exts
+
+	def sort_matches(self,matches,basename):
+		filename,ext = os.path.splitext(basename)
+		aliases = self.find_aliases_for_ext(ext)
+
+		def sort_func(match):
+			name = re.sub(basename,'',match)
+			extnames = re.findall(r"""\.[^.]+""",name)
+			score = 0
+			for ext in extnames:
+				ext
+				if ext in self.extensions:
+					score += self.extensions.index(ext) + 1
+				elif ext in aliases:
+					score += aliases.index(ext) + 11
+			
+			return score
+
+		return sorted(matches,key=sort_func)
