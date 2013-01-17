@@ -1,7 +1,7 @@
 Crawl
 =====
 
-[![Build Status](https://travis-ci.org/OiNutter/Crawl.png)](https://travis-ci.org/OiNutter/Crawl)
+[![Build Status](https://travis-ci.org/OiNutter/crawl.png)](https://travis-ci.org/OiNutter/crawl)
 
 Crawl is a port of the Ruby gem
 [Hike](https://github.com/sstephenson/hike) to Python. Crawl will scan
