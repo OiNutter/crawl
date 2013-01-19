@@ -42,16 +42,10 @@ class BaseTests(object):
 		self.assertEqual([".builder",".coffee",".str",".erb"],self.crawl.extensions)
 
 	def testIndex(self):
-		if hasattr(self,'assertIsInstance'):
-			self.assertIsInstance(self.crawl.index(),crawl.index.Index)
-		else:
-			assert isinstance(self.crawl.index(),crawl.index.Index)
+		self.assertIsInstance(self.crawl.index(),crawl.index.Index)
 
 	def testFindNonexistantFile(self):
-		if hasattr(self,'assertIsNone'):
-			self.assertIsNone(self.crawl.find("people/show.html"))
-		else:
-			self.assertEqual(None,self.crawl.find("people/show.html"))
+		self.assertIsNone(self.crawl.find("people/show.html"))
 
 	def testFindWithoutExtension(self):
 		self.assertEqual(
@@ -197,10 +191,7 @@ class BaseTests(object):
 
 	def testBasePathOptionMustBeExpanded(self):
 		self.setUp()
-		if hasattr(self,'assertIsNone'):
-			self.assertIsNone(self.crawl.find('./index.html',base_path='app/views/projects'))
-		else:
-			self.assertEqual(None,self.crawl.find('./index.html',base_path='app/views/projects'))
+		self.assertIsNone(self.crawl.find('./index.html',base_path='app/views/projects'))
 
 	def testFindAllRespectsPathOrder(self):
 
@@ -242,10 +233,7 @@ class BaseTests(object):
 			)
 
 	def testIgnoresDirectories(self):
-		if hasattr(self,'assertIsNone'):
-			self.assertIsNone(self.crawl.find("recordings"))
-		else:
-			self.assertEqual(None,self.crawl.find("recordings"))
+		self.assertIsNone(self.crawl.find("recordings"))
 
 	def testEntries(self):
 		expected = [
@@ -270,10 +258,7 @@ class BaseTests(object):
 		assert self.crawl.stat(self.fixture_path("app/views/index.html.erb"))
 		assert self.crawl.stat(self.fixture_path("app/views"))
 
-		if hasattr(self,'assertIsNone'):
-			self.assertIsNone(self.crawl.stat(self.fixture_path("app/views/missing.html")))
-		else:
-			self.assertEquals(None,self.crawl.stat(self.fixture_path("app/views/missing.html")))
+		self.assertIsNone(self.crawl.stat(self.fixture_path("app/views/missing.html")))
 
 class CrawlTest(BaseTests,unittest.TestCase):
 
@@ -286,10 +271,7 @@ class CrawlTest(BaseTests,unittest.TestCase):
 
 	def testFindReflectsChangesInTheFileSystem(self):
 		try:
-			if hasattr(self,'assertIsNone'):
-				self.assertIsNone(self.crawl.find("dashboard.html"))
-			else:
-				self.assertEquals(None,self.crawl.find("dashboard.html"))
+			self.assertIsNone(self.crawl.find("dashboard.html"))
 			f = open(self.fixture_path('dashboard.html'),'w')
 			f.write('dashboard')
 			f.close()
@@ -341,10 +323,7 @@ class IndexTest(BaseTests,unittest.TestCase):
 
 	def testFindDoesNotReflectChangesInTheFileSystem(self):
 		try:
-			if hasattr(self,'assertIsNone'):
-				self.assertIsNone(self.crawl.find("dashboard.html"))
-			else:
-				self.assertEquals(None,self.crawl.find("dashboard.html"))
+			self.assertIsNone(self.crawl.find("dashboard.html"))
 			f = open(self.fixture_path('dashboard.html'),'w')
 			f.write('dashboard')
 			f.close()
