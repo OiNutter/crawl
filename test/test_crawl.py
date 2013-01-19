@@ -4,9 +4,9 @@ import unittest
 import os
 
 import crawl
-from crawl_test import FIXTURE_ROOT
+from crawl_test import FIXTURE_ROOT,TestBase
 
-class BaseTests(object):
+class SharedTests(object):
 
 	def new_crawl(self,callback=None):
 		search_path = crawl.Crawl(FIXTURE_ROOT)
@@ -260,7 +260,7 @@ class BaseTests(object):
 
 		self.assertIsNone(self.crawl.stat(self.fixture_path("app/views/missing.html")))
 
-class CrawlTest(BaseTests,unittest.TestCase):
+class CrawlTest(SharedTests,TestBase):
 
 	def testRootDefaultsToCWD(self):
 		cur_dir = os.curdir
@@ -283,7 +283,7 @@ class CrawlTest(BaseTests,unittest.TestCase):
 			os.unlink(self.fixture_path('dashboard.html'))
 			assert not os.path.exists(self.fixture_path('dashboard.html'))
 
-class IndexTest(BaseTests,unittest.TestCase):
+class IndexTest(SharedTests,TestBase):
 
 	def new_crawl(self,callback=None):
 		search = super(IndexTest,self).new_crawl(callback=callback)
