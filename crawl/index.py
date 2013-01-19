@@ -27,7 +27,6 @@ class Index:
 
 			if os.path.exists(path) and os.path.isdir(path):
 					entries = os.listdir(path)
-					print entries
 
 			self.entries_cache[path] = [filename for filename in entries if not re.search(r"""^\.|~$|^\#.*\#$""",filename)]
 
@@ -41,51 +40,53 @@ class Index:
 		return copy.deepcopy(self.stat_cache[path])
 
 	def find(self,*logical_paths,**kwargs):
-	
-		if kwargs.has_key('callback') and kwargs['callback']:
 
+		if kwargs.has_key('callback') and kwargs['callback']:
 			base_path = kwargs.get('base_path',self.root)
 
+			results = []
 			for path in logical_paths:
 				path = re.sub(r"""^/""",'',path)
 
 				if not self.is_relative_path(path):
-					result = self.find_in_paths(path,kwargs['callback'])
+					result = self.find_in_paths(path)
 				else:
-					result = self.find_in_base_path(path,base_path,kwargs['callback'])
+					result = self.find_in_base_path(path,base_path)
 
 				if result:
-					return result
+					results.extend(result)
+
+			return kwargs['callback'](results)
 
 		else:
 			kwargs['callback'] = lambda paths:paths[0] if paths else None
 			return self.find(*logical_paths,**kwargs)
 
-	def find_in_paths(self,path,callback=None):
+	def find_in_paths(self,path):
 
 		dirname,basename = os.path.split(path)
 
-		for path in self.paths:
-			result = self.match(os.path.join(path,dirname),basename,callback)
+		results = []
+		for search_path in self.paths:
+			result = self.match(os.path.join(search_path,dirname),basename)
 			if result:
-				return result
+				results.extend(result)
 
-		return None
+		return results
 
-	def find_in_base_path(self,path,base_path,callback=None):
+	def find_in_base_path(self,path,base_path):
 
 		candidate = os.path.join(base_path,path)
 		dirname,basename = os.path.split(candidate)
-		return self.match(dirname,basename,callback) if self.do_paths_contain(dirname) else None
+		return self.match(dirname,basename) if self.do_paths_contain(dirname) else None
 
 	def do_paths_contain(self,dirname):
 		matches = [path for path in self.paths if str(dirname)[0:len(path)] == path]
 		return True if matches else False
 
-	def match(self,dirname,basename,callback=None):
+	def match(self,dirname,basename):
 		
 		matches = self.entries(dirname)
-
 		pattern = self.get_pattern_for(basename)
 
 		matches[:] = [match for match in matches if pattern.match(match)]
@@ -97,8 +98,7 @@ class Index:
 			if os.path.isfile(pathname):
 				results.append(pathname)
 
-		print 'RESULTS: ', results
-		return callback(results) if callback else results
+		return results
 
 	def get_pattern_for(self,basename):
 		if self.patterns.has_key(basename):
