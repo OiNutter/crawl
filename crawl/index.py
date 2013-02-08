@@ -26,7 +26,7 @@ class Index:
 			entries = []
 
 			if os.path.exists(path) and os.path.isdir(path):
-					entries = os.listdir(path)
+					entries = sorted(os.listdir(path))
 
 			self.entries_cache[path] = [filename for filename in entries if not re.search(r"""^\.|~$|^\#.*\#$""",filename)]
 
