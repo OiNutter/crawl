@@ -110,7 +110,7 @@ class Index:
 
 	def build_pattern_for(self,basename):
 
-		filename, ext = os.path.splitext(basename.lower())
+		filename, ext = os.path.splitext(basename)
 		aliases = self.find_aliases_for_ext(self.extensions.normalize_element(ext))
 
 		basename_re = re.escape(basename)
